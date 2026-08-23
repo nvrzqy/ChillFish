@@ -1,0 +1,1 @@
+"""Visual anomaly screening components."""

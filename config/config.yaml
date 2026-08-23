@@ -1,0 +1,14 @@
+visual:
+  image_size: 224
+  anomaly_method: centroid
+  threshold_std_multiplier: 2.0
+
+thermal:
+  # Simulation parameter for proof-of-concept. Validate for lemuru before claims.
+  temperature_threshold: -15.0
+  low_risk_threshold: 0.25
+  high_risk_threshold: 0.60
+
+decision:
+  default_wait_hours: 24
+  default_eta_hours: 48

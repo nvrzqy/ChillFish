@@ -1,0 +1,8 @@
+{
+  "reference_count": 12,
+  "mean_distance": 0.6102509498596191,
+  "std_distance": 0.0782291367650032,
+  "check_threshold": 0.6884800866246223,
+  "anomaly_threshold": 0.7667092233896255,
+  "method": "centroid_euclidean"
+}
