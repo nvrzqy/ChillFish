@@ -6,12 +6,23 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 from src.config import PROJECT_ROOT
-from src.visual.preprocess import list_images
 
 
 MODEL_DIR = PROJECT_ROOT / "models" / "visual_lite"
 REFERENCE_PATH = MODEL_DIR / "reference.npz"
 THRESHOLD_PATH = MODEL_DIR / "threshold.json"
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
+
+
+def list_reference_images(directory: str | Path) -> list[Path]:
+    directory = Path(directory)
+    if not directory.exists():
+        raise FileNotFoundError(f"Image directory not found: {directory}")
+    return sorted(
+        path
+        for path in directory.iterdir()
+        if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS
+    )
 
 
 def extract_simple_features(image_path: str | Path) -> np.ndarray:
@@ -50,7 +61,7 @@ def build_simple_reference(
     reference_dir: str | Path = PROJECT_ROOT / "data" / "images" / "reference",
     model_dir: str | Path = MODEL_DIR,
 ) -> dict:
-    image_paths = [path for path in list_images(reference_dir) if path.name != ".gitkeep"]
+    image_paths = list_reference_images(reference_dir)
     if not image_paths:
         raise ValueError(f"No reference images found in {reference_dir}")
 
