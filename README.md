@@ -285,8 +285,3 @@ models/visual_lite/threshold.json
 - Foto upload belum menjadi classifier busuk/segar.
 - Risk score perlu dikalibrasi ulang dengan data sensor dan inspeksi lapangan.
 - Rekomendasi tetap membutuhkan validasi manusia.
-
-## Catatan Submission
-
-Untuk demonstrasi software-only, tampilkan terminal dan aplikasi secara bersamaan. Jalankan aplikasi dengan Docker Compose, buka browser ke `http://localhost:8000`, lalu tunjukkan alur Dataset Mode, Manual Mode, optional photo upload, dan toggle bahasa.
-
