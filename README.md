@@ -150,18 +150,6 @@ requirements-app.txt
 
 ## Secret / Environment
 
-Aplikasi ini tidak membutuhkan secret atau file environment.
-
-Tidak diperlukan:
-
-- API key;
-- token;
-- credential database;
-- `.env`;
-- external service.
-
-Jika form submission meminta secret zip, isi dengan keterangan:
-
 ```text
 No secret/environment file is required. The application runs fully offline/local using Docker Compose.
 ```
