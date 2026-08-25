@@ -92,11 +92,12 @@ Pada MVP ini, upload foto belum mengubah risk score tabular. Foto dipakai sebaga
 
 ## Dataset
 
-Dataset utama berasal dari paket:
+Dataset utama berasal dari data sintetik yang dibangkitan:
 
 ```text
 AIC_2026_PPN_Pengambengan_Lemuru_Logistics_Network_Dataset_v3
 ```
+Dataset tersebut dapat diunduh pada: https://drive.google.com/drive/u/0/folders/1BklafoqqPGDfGYTWcveag6akJiyJSk7O
 
 Dataset yang dipakai aplikasi web:
 
