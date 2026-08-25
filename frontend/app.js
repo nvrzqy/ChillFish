@@ -4,6 +4,7 @@ const lotInput = document.querySelector("#lot-id");
 const statusEl = document.querySelector("#connection-status");
 const sampleButtons = document.querySelector("#sample-buttons");
 const lotOptions = document.querySelector("#lot-options");
+const exportButton = document.querySelector("#export-button");
 const datasetTab = document.querySelector("#dataset-tab");
 const manualTab = document.querySelector("#manual-tab");
 const datasetPanel = document.querySelector("#dataset-panel");
@@ -121,7 +122,13 @@ function setMode(mode) {
 }
 
 async function loadLots() {
-  const response = await fetch("/api/lots?limit=12");
+  const params = new URLSearchParams({ limit: "12" });
+  const query = lotInput.value.trim();
+  if (query) {
+    params.set("q", query);
+  }
+
+  const response = await fetch(`/api/lots?${params.toString()}`);
   if (!response.ok) {
     throw new Error("Failed to load lots");
   }
@@ -135,13 +142,21 @@ async function loadLots() {
 
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = `${lot.lot_id} · ${lot.condition_status}`;
+    button.textContent = `${lot.lot_id} - ${lot.condition_status} - ${lot.handling_scenario}`;
     button.addEventListener("click", () => {
       lotInput.value = lot.lot_id;
       predictLot(lot.lot_id).catch((error) => setStatus(error.message, true));
     });
     sampleButtons.appendChild(button);
   }
+}
+
+function debounce(callback, delay = 180) {
+  let timer;
+  return (...args) => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => callback(...args), delay);
+  };
 }
 
 form.addEventListener("submit", (event) => {
@@ -152,6 +167,19 @@ form.addEventListener("submit", (event) => {
     return;
   }
   predictLot(lotId).catch((error) => setStatus(error.message, true));
+});
+
+lotInput.addEventListener(
+  "input",
+  debounce(() => {
+    loadLots().catch((error) => setStatus(error.message, true));
+  }),
+);
+
+exportButton.addEventListener("click", () => {
+  setStatus("Exporting all dataset predictions...");
+  window.location.href = "/api/export/predictions.csv";
+  window.setTimeout(() => setStatus("Export started"), 500);
 });
 
 manualForm.addEventListener("submit", (event) => {

@@ -1,0 +1,9 @@
+{
+  "reference_count": 12,
+  "mean_distance": 0.671541154384613,
+  "std_distance": 0.22396256029605865,
+  "check_threshold": 0.8955037146806717,
+  "anomaly_threshold": 1.1194662749767303,
+  "method": "simple_color_texture_centroid",
+  "note": "Prototype visual anomaly screening from normal lemuru reference photos."
+}

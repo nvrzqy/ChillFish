@@ -12,6 +12,7 @@ COPY config ./config
 COPY data/app ./data/app
 COPY frontend ./frontend
 COPY models/tabular ./models/tabular
+COPY models/visual_lite ./models/visual_lite
 COPY src ./src
 
 EXPOSE 8000

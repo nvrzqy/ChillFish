@@ -179,6 +179,19 @@ button:hover {
   margin-top: 6px;
 }
 
+.export-button {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 12px;
+  border: 1px solid #bfd0e3;
+  background: #eef4fb;
+  color: var(--blue);
+}
+
+.export-button:hover {
+  background: #dfeaf7;
+}
+
 .sample-list {
   margin-top: 28px;
 }

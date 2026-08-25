@@ -1,14 +1,15 @@
 import tempfile
+from io import StringIO
 from pathlib import Path
 
 import pandas as pd
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.config import PROJECT_ROOT
 from src.tabular.dataset import load_available_table
-from src.tabular.predict_lot import predict_feature_row, predict_lot
+from src.tabular.predict_lot import predict_feature_row, predict_feature_table, predict_lot
 
 
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
@@ -28,8 +29,16 @@ def health():
 
 
 @app.get("/api/lots")
-def list_lots(limit: int = 600):
+def list_lots(limit: int = 600, q: str = ""):
     df = load_available_table()
+    if q:
+        query = q.strip().lower()
+        df = df[
+            df["lot_id"].astype(str).str.lower().str.contains(query, na=False)
+            | df["handling_scenario"].astype(str).str.lower().str.contains(query, na=False)
+            | df["recommended_action"].astype(str).str.lower().str.contains(query, na=False)
+            | df["condition_status"].astype(str).str.lower().str.contains(query, na=False)
+        ]
     rows = df[["lot_id", "handling_scenario", "recommended_action", "condition_status"]].head(limit)
     return {
         "count": int(len(rows)),
@@ -45,6 +54,20 @@ def predict(lot_id: str):
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get("/api/export/predictions.csv")
+def export_predictions():
+    df = load_available_table()
+    predictions = predict_feature_table(df)
+    buffer = StringIO()
+    predictions.to_csv(buffer, index=False)
+    buffer.seek(0)
+    return StreamingResponse(
+        iter([buffer.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=chillfish_predictions.csv"},
+    )
 
 
 def _demerits_from_proxy(score: float) -> dict:
@@ -116,9 +139,9 @@ async def _try_visual_inference(photo: UploadFile | None) -> dict | None:
             temp_path = Path(handle.name)
 
         try:
-            from src.visual.predict_visual import predict_visual
+            from src.visual.simple_anomaly import predict_simple_visual
 
-            result = predict_visual(temp_path)
+            result = predict_simple_visual(temp_path)
             result["filename"] = photo.filename
             return result
         except Exception as exc:

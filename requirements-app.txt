@@ -4,3 +4,5 @@ xgboost
 fastapi
 uvicorn
 python-multipart
+Pillow
+PyYAML

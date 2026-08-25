@@ -26,22 +26,35 @@ def _top_probabilities(classes: list[str], probabilities, limit: int = 3) -> lis
     return [{"label": label, "probability": float(prob)} for label, prob in ranked]
 
 
-def predict_feature_row(row: pd.DataFrame, model_dir: str | Path = MODEL_DIR) -> dict:
-    metadata = _load_metadata(model_dir)
-    X = make_feature_matrix(row, expected_columns=metadata["feature_columns"])
+def _load_boosters(model_dir: str | Path = MODEL_DIR) -> dict:
+    model_dir = Path(model_dir)
+    action_model = xgb.Booster()
+    action_model.load_model(model_dir / "action_xgb.json")
+    condition_model = xgb.Booster()
+    condition_model.load_model(model_dir / "condition_xgb.json")
+    risk_model = xgb.Booster()
+    risk_model.load_model(model_dir / "risk_xgb.json")
+    return {
+        "action": action_model,
+        "condition": condition_model,
+        "risk": risk_model,
+    }
 
+
+def predict_feature_row(
+    row: pd.DataFrame,
+    model_dir: str | Path = MODEL_DIR,
+    metadata: dict | None = None,
+    boosters: dict | None = None,
+) -> dict:
+    metadata = metadata or _load_metadata(model_dir)
+    boosters = boosters or _load_boosters(model_dir)
+    X = make_feature_matrix(row, expected_columns=metadata["feature_columns"])
     matrix = xgb.DMatrix(X, feature_names=list(X.columns))
 
-    action_model = xgb.Booster()
-    action_model.load_model(Path(model_dir) / "action_xgb.json")
-    condition_model = xgb.Booster()
-    condition_model.load_model(Path(model_dir) / "condition_xgb.json")
-    risk_model = xgb.Booster()
-    risk_model.load_model(Path(model_dir) / "risk_xgb.json")
-
-    action_prob = np.asarray(action_model.predict(matrix))[0]
-    condition_prob = np.asarray(condition_model.predict(matrix))[0]
-    risk_score = float(np.asarray(risk_model.predict(matrix))[0])
+    action_prob = np.asarray(boosters["action"].predict(matrix))[0]
+    condition_prob = np.asarray(boosters["condition"].predict(matrix))[0]
+    risk_score = float(np.asarray(boosters["risk"].predict(matrix))[0])
 
     action_top = _top_probabilities(metadata["action_classes"], action_prob)
     condition_top = _top_probabilities(metadata["condition_classes"], condition_prob)
@@ -65,6 +78,39 @@ def predict_feature_row(row: pd.DataFrame, model_dir: str | Path = MODEL_DIR) ->
         },
         "claim_note": "Decision-support prediction only; not food-safety, SNI, histamine, or export certification.",
     }
+
+
+def predict_feature_table(df: pd.DataFrame, model_dir: str | Path = MODEL_DIR) -> pd.DataFrame:
+    metadata = _load_metadata(model_dir)
+    boosters = _load_boosters(model_dir)
+    X = make_feature_matrix(df, expected_columns=metadata["feature_columns"])
+    matrix = xgb.DMatrix(X, feature_names=list(X.columns))
+
+    action_probs = np.asarray(boosters["action"].predict(matrix))
+    condition_probs = np.asarray(boosters["condition"].predict(matrix))
+    risk_scores = np.asarray(boosters["risk"].predict(matrix))
+
+    action_indices = action_probs.argmax(axis=1)
+    condition_indices = condition_probs.argmax(axis=1)
+
+    output = pd.DataFrame(
+        {
+            "lot_id": df["lot_id"].to_numpy(),
+            "predicted_condition": [metadata["condition_classes"][idx] for idx in condition_indices],
+            "condition_confidence": condition_probs.max(axis=1),
+            "predicted_risk_score_0_100": risk_scores,
+            "predicted_action": [metadata["action_classes"][idx] for idx in action_indices],
+            "action_confidence": action_probs.max(axis=1),
+            "remaining_quality_window_h": df["remaining_quality_window_h"].to_numpy(),
+            "max_temp_c": df["max_temp_c"].to_numpy(),
+            "time_above_10c_h": df["time_above_10c_h"].to_numpy(),
+            "visual_proxy_score_0_16": df["total_proxy_0_16"].to_numpy(),
+            "handling_scenario": df["handling_scenario"].to_numpy(),
+            "weak_label_action": df["recommended_action"].to_numpy(),
+            "weak_label_risk_score_0_100": df["risk_score_0_100"].to_numpy(),
+        }
+    )
+    return output
 
 
 def predict_lot(lot_id: str, raw_root: str | Path = RAW_ROOT, model_dir: str | Path = MODEL_DIR) -> dict:
