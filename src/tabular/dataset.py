@@ -7,6 +7,7 @@ from src.config import PROJECT_ROOT
 
 RAW_ROOT = PROJECT_ROOT / "data" / "raw" / "aic_dataset_package"
 CORE_ROOT = RAW_ROOT / "01_core_network"
+APP_TABLE_PATH = PROJECT_ROOT / "data" / "app" / "competition_inference_table.csv"
 
 NUMERIC_FEATURES = [
     "lot_mass_kg",
@@ -66,6 +67,23 @@ def load_competition_table(raw_root: str | Path = RAW_ROOT) -> pd.DataFrame:
 
     df["condition_status"] = df["total_proxy_0_16"].apply(condition_from_proxy)
     return df
+
+
+def load_app_table(path: str | Path = APP_TABLE_PATH) -> pd.DataFrame:
+    table_path = Path(path)
+    if not table_path.exists():
+        raise FileNotFoundError(
+            f"Packaged inference table not found: {table_path}. "
+            "Run: python -m src.tabular.export_app_table"
+        )
+    return pd.read_csv(table_path)
+
+
+def load_available_table(raw_root: str | Path = RAW_ROOT) -> pd.DataFrame:
+    try:
+        return load_competition_table(raw_root)
+    except FileNotFoundError:
+        return load_app_table()
 
 
 def make_feature_matrix(df: pd.DataFrame, expected_columns: list[str] | None = None) -> pd.DataFrame:

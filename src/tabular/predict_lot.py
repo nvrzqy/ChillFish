@@ -2,11 +2,12 @@ import argparse
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
-from xgboost import XGBClassifier, XGBRegressor
+import xgboost as xgb
 
 from src.config import PROJECT_ROOT
-from src.tabular.dataset import RAW_ROOT, load_competition_table, make_feature_matrix
+from src.tabular.dataset import RAW_ROOT, load_available_table, make_feature_matrix
 
 
 MODEL_DIR = PROJECT_ROOT / "models" / "tabular"
@@ -25,32 +26,29 @@ def _top_probabilities(classes: list[str], probabilities, limit: int = 3) -> lis
     return [{"label": label, "probability": float(prob)} for label, prob in ranked]
 
 
-def predict_lot(lot_id: str, raw_root: str | Path = RAW_ROOT, model_dir: str | Path = MODEL_DIR) -> dict:
-    df = load_competition_table(raw_root)
-    row = df[df["lot_id"] == lot_id]
-    if row.empty:
-        raise ValueError(f"Unknown lot_id: {lot_id}")
-
+def predict_feature_row(row: pd.DataFrame, model_dir: str | Path = MODEL_DIR) -> dict:
     metadata = _load_metadata(model_dir)
     X = make_feature_matrix(row, expected_columns=metadata["feature_columns"])
 
-    action_model = XGBClassifier()
+    matrix = xgb.DMatrix(X, feature_names=list(X.columns))
+
+    action_model = xgb.Booster()
     action_model.load_model(Path(model_dir) / "action_xgb.json")
-    condition_model = XGBClassifier()
+    condition_model = xgb.Booster()
     condition_model.load_model(Path(model_dir) / "condition_xgb.json")
-    risk_model = XGBRegressor()
+    risk_model = xgb.Booster()
     risk_model.load_model(Path(model_dir) / "risk_xgb.json")
 
-    action_prob = action_model.predict_proba(X)[0]
-    condition_prob = condition_model.predict_proba(X)[0]
-    risk_score = float(risk_model.predict(X)[0])
+    action_prob = np.asarray(action_model.predict(matrix))[0]
+    condition_prob = np.asarray(condition_model.predict(matrix))[0]
+    risk_score = float(np.asarray(risk_model.predict(matrix))[0])
 
     action_top = _top_probabilities(metadata["action_classes"], action_prob)
     condition_top = _top_probabilities(metadata["condition_classes"], condition_prob)
 
     actual = row.iloc[0]
     return {
-        "lot_id": lot_id,
+        "lot_id": actual.get("lot_id", "MANUAL-LOT"),
         "predicted_risk_score_0_100": risk_score,
         "predicted_action": action_top[0]["label"],
         "action_probabilities": action_top,
@@ -67,6 +65,14 @@ def predict_lot(lot_id: str, raw_root: str | Path = RAW_ROOT, model_dir: str | P
         },
         "claim_note": "Decision-support prediction only; not food-safety, SNI, histamine, or export certification.",
     }
+
+
+def predict_lot(lot_id: str, raw_root: str | Path = RAW_ROOT, model_dir: str | Path = MODEL_DIR) -> dict:
+    df = load_available_table(raw_root)
+    row = df[df["lot_id"] == lot_id]
+    if row.empty:
+        raise ValueError(f"Unknown lot_id: {lot_id}")
+    return predict_feature_row(row, model_dir)
 
 
 def print_prediction(result: dict) -> None:

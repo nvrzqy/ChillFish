@@ -1,0 +1,14 @@
+.git
+__pycache__/
+*.pyc
+.pytest_cache/
+.pytest_tmp/
+pytest-cache-files-*/
+.matplotlib_cache/
+data/raw/
+data/images/reference/
+data/images/test/
+models/torch_cache/
+docs/
+README.md
+outputs/

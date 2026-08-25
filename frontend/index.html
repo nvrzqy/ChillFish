@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChillFish AI MVP</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="workspace" aria-label="ChillFish inference workspace">
+        <aside class="input-pane">
+          <div class="brand-row">
+            <div class="mark" aria-hidden="true">CF</div>
+            <div>
+              <h1>ChillFish</h1>
+              <p>AI decision support for lemuru cold-chain lots</p>
+            </div>
+          </div>
+
+          <div class="mode-tabs" role="tablist" aria-label="Inference mode">
+            <button id="dataset-tab" class="active" type="button">Dataset</button>
+            <button id="manual-tab" type="button">Manual</button>
+          </div>
+
+          <section id="dataset-panel">
+            <form id="predict-form" class="lot-form">
+              <label for="lot-id">Lot ID</label>
+              <div class="input-row">
+                <input id="lot-id" name="lot-id" list="lot-options" value="PGB-LMR-0003" autocomplete="off" />
+                <button type="submit">Run AI</button>
+              </div>
+              <datalist id="lot-options"></datalist>
+            </form>
+
+            <div class="sample-list" aria-label="Sample lots">
+              <div class="section-label">Sample Lots</div>
+              <div id="sample-buttons" class="sample-buttons"></div>
+            </div>
+          </section>
+
+          <section id="manual-panel" hidden>
+            <form id="manual-form" class="manual-form">
+              <label for="manual-lot-id">New Lot ID</label>
+              <input id="manual-lot-id" name="lot_id" value="NEW-LEMURU-001" />
+
+              <label for="lot-mass">Lot Mass kg</label>
+              <input id="lot-mass" name="lot_mass_kg" type="number" value="350" min="1" step="1" />
+
+              <label for="handling-scenario">Handling Scenario</label>
+              <select id="handling-scenario" name="handling_scenario">
+                <option value="controlled_ice">controlled_ice</option>
+                <option value="delayed_chilling_2h">delayed_chilling_2h</option>
+                <option value="melted_ice">melted_ice</option>
+                <option value="loading_excursion">loading_excursion</option>
+              </select>
+
+              <label for="target-market">Target Market Node</label>
+              <select id="target-market" name="target_market_node_id">
+                <option value="N004">N004</option>
+                <option value="N005">N005</option>
+                <option value="N007">N007</option>
+              </select>
+
+              <div class="two-col">
+                <div>
+                  <label for="mean-temp">Mean Temp C</label>
+                  <input id="mean-temp" name="mean_temp_c" type="number" value="2.5" step="0.1" />
+                </div>
+                <div>
+                  <label for="max-temp-input">Max Temp C</label>
+                  <input id="max-temp-input" name="max_temp_c" type="number" value="8.0" step="0.1" />
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div>
+                  <label for="above-4-input">Hours &gt; 4 C</label>
+                  <input id="above-4-input" name="time_above_4c_h" type="number" value="2" min="0" step="0.25" />
+                </div>
+                <div>
+                  <label for="above-10-input">Hours &gt; 10 C</label>
+                  <input id="above-10-input" name="time_above_10c_h" type="number" value="0.5" min="0" step="0.25" />
+                </div>
+              </div>
+
+              <label for="above-15-input">Hours &gt; 15 C</label>
+              <input id="above-15-input" name="time_above_15c_h" type="number" value="0" min="0" step="0.25" />
+
+              <label for="remaining-window-input">Remaining Quality Window h</label>
+              <input id="remaining-window-input" name="remaining_quality_window_h" type="number" value="96" min="0" step="1" />
+
+              <label for="visual-score">Visual Proxy Score 0-16</label>
+              <input id="visual-score" name="visual_proxy_score_0_16" type="number" value="6" min="0" max="16" step="1" />
+
+              <label for="photo">Photo optional</label>
+              <input id="photo" name="photo" type="file" accept="image/*" />
+
+              <button type="submit" class="wide-button">Predict New Lot</button>
+            </form>
+          </section>
+
+          <div class="note">
+            <strong>MVP scope:</strong> one input, synchronous local inference, static parameters.
+          </div>
+        </aside>
+
+        <section class="result-pane" aria-live="polite">
+          <div class="status-strip">
+            <span id="connection-status">Ready</span>
+            <span>Local inference</span>
+          </div>
+
+          <div class="summary-grid">
+            <div class="metric condition">
+              <span>Condition</span>
+              <strong id="condition">-</strong>
+            </div>
+            <div class="metric risk">
+              <span>Risk Score</span>
+              <strong id="risk-score">-</strong>
+            </div>
+            <div class="metric action">
+              <span>Recommendation</span>
+              <strong id="action">-</strong>
+            </div>
+          </div>
+
+          <div class="details-layout">
+            <section>
+              <h2>Action Probability</h2>
+              <div id="action-probs" class="bars"></div>
+            </section>
+
+            <section>
+              <h2>Condition Probability</h2>
+              <div id="condition-probs" class="bars"></div>
+            </section>
+          </div>
+
+          <section class="signals">
+            <h2>Key Signals</h2>
+            <dl>
+              <div><dt>Remaining quality window</dt><dd id="remaining-window">-</dd></div>
+              <div><dt>Max temperature</dt><dd id="max-temp">-</dd></div>
+              <div><dt>Time above 10 C</dt><dd id="above-10">-</dd></div>
+              <div><dt>Visual proxy score</dt><dd id="visual-proxy">-</dd></div>
+              <div><dt>Handling scenario</dt><dd id="scenario">-</dd></div>
+            </dl>
+          </section>
+
+          <section class="signals" id="visual-upload-section" hidden>
+            <h2>Photo Upload</h2>
+            <p id="visual-upload-note" class="claim-note"></p>
+          </section>
+
+          <p class="claim-note" id="claim-note">
+            Decision-support output only. Not food-safety, SNI, histamine, or export certification.
+          </p>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

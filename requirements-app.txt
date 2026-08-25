@@ -1,0 +1,6 @@
+numpy
+pandas
+xgboost
+fastapi
+uvicorn
+python-multipart

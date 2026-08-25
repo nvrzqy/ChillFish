@@ -9,3 +9,6 @@ xgboost
 PyYAML
 joblib
 pytest
+fastapi
+uvicorn
+python-multipart
