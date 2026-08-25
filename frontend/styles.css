@@ -491,6 +491,68 @@ dd {
   color: var(--red);
 }
 
+.guide-section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.guide-tabs {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.guide-tabs button {
+  min-height: 36px;
+  border: 1px solid #bfd0e3;
+  background: #eef4fb;
+  color: var(--blue);
+}
+
+.guide-tabs button.active {
+  background: var(--blue);
+  color: white;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.guide-grid article {
+  border: 1px solid var(--line);
+  padding: 14px;
+  background: #fbfcfe;
+}
+
+.guide-grid h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.guide-grid p,
+.guide-grid li {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.guide-grid p {
+  margin: 0;
+}
+
+.guide-grid ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.guide-grid strong {
+  color: var(--ink);
+}
+
 .is-error {
   color: var(--red);
 }
@@ -503,6 +565,7 @@ dd {
   .workspace,
   .summary-grid,
   .details-layout,
+  .guide-grid,
   dl {
     grid-template-columns: 1fr;
   }

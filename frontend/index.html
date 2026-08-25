@@ -190,6 +190,147 @@
           <p class="claim-note" id="claim-note">
             Decision-support output only. Not food-safety, SNI, histamine, or export certification.
           </p>
+
+          <section class="guide-section" aria-label="Guide">
+            <div class="guide-tabs" role="tablist" aria-label="Guide type">
+              <button id="output-guide-tab" class="active" type="button">Output Guide</button>
+              <button id="input-guide-tab" type="button">Manual Input Guide</button>
+            </div>
+
+            <div id="output-guide-panel" class="guide-grid">
+              <article>
+                <h3>Condition</h3>
+                <p>AI estimate of lot condition from tabular features.</p>
+                <ul>
+                  <li><strong>NORMAL</strong>: visual proxy 0-5, generally normal.</li>
+                  <li><strong>CHECK</strong>: visual proxy 6-10, needs attention.</li>
+                  <li><strong>POOR</strong>: visual proxy 11-16, higher concern.</li>
+                </ul>
+              </article>
+
+              <article>
+                <h3>Risk Score</h3>
+                <p>Predicted quality downgrade risk from the AI model. Higher means more urgent.</p>
+                <ul>
+                  <li><strong>0-30</strong>: lower risk.</li>
+                  <li><strong>31-60</strong>: watch / moderate risk.</li>
+                  <li><strong>61-100</strong>: high risk, prioritize action.</li>
+                </ul>
+              </article>
+
+              <article>
+                <h3>Recommendation</h3>
+                <p>Operational action suggested by the model.</p>
+                <ul>
+                  <li><strong>HOLD_CHILLED</strong>: keep chilled, no urgent action.</li>
+                  <li><strong>RE_ICE_AND_ROUTE</strong>: add ice / improve cold-chain, then route.</li>
+                  <li><strong>PROCESS_IMMEDIATELY</strong>: process quickly.</li>
+                  <li><strong>MANUAL_INSPECTION</strong>: human inspection recommended.</li>
+                  <li><strong>DOMESTIC_CHILLED</strong>: route as chilled domestic lot.</li>
+                  <li><strong>PROCESS_EXPORT_CANDIDATE</strong>: candidate for processing/export scenario.</li>
+                  <li><strong>LOCAL_FRESH_ONLY</strong>: local fresh route only.</li>
+                </ul>
+              </article>
+
+              <article>
+                <h3>Probability</h3>
+                <p>Model confidence for the top condition or action. It is not a food-safety probability.</p>
+              </article>
+
+              <article>
+                <h3>Key Signals</h3>
+                <p>Input factors that help explain the prediction.</p>
+                <ul>
+                  <li><strong>Remaining quality window</strong>: estimated hours before quality window runs out.</li>
+                  <li><strong>Max temperature</strong>: highest recorded temperature.</li>
+                  <li><strong>Time above 10 C</strong>: duration of stronger thermal exposure.</li>
+                  <li><strong>Visual proxy score</strong>: manual/synthetic visual score from 0 normal to 16 poor.</li>
+                </ul>
+              </article>
+
+              <article>
+                <h3>Visual Anomaly</h3>
+                <p>Photo-based comparison against normal lemuru reference images.</p>
+                <ul>
+                  <li><strong>NORMAL</strong>: similar to reference photos.</li>
+                  <li><strong>CHECK</strong>: somewhat different; inspect if needed.</li>
+                  <li><strong>ANOMALOUS</strong>: noticeably different from reference photos.</li>
+                </ul>
+              </article>
+            </div>
+
+            <div id="input-guide-panel" class="guide-grid" hidden>
+              <article>
+                <h3>Lot ID</h3>
+                <p>Unique name/code for the new fish lot. Example: <strong>NEW-LEMURU-001</strong>.</p>
+              </article>
+
+              <article>
+                <h3>Lot Mass kg</h3>
+                <p>Total mass of the lot in kilograms. This helps represent shipment scale.</p>
+              </article>
+
+              <article>
+                <h3>Handling Scenario</h3>
+                <p>Current handling condition, such as controlled ice, delayed chilling, melted ice, or loading excursion.</p>
+              </article>
+
+              <article>
+                <h3>Target Market Node</h3>
+                <p>Destination scenario code used by the MVP dataset. It represents where the lot is planned to go.</p>
+              </article>
+
+              <article>
+                <h3>Mean Temp C</h3>
+                <p>Average product temperature from logger/sensor history. Higher average temperature can increase quality risk.</p>
+              </article>
+
+              <article>
+                <h3>Max Temp C</h3>
+                <p>Highest recorded product temperature. This captures possible temperature excursions.</p>
+              </article>
+
+              <article>
+                <h3>Hours &gt; 4 C</h3>
+                <p>Total time above 4 C. This indicates mild cold-chain exposure for chilled fish.</p>
+              </article>
+
+              <article>
+                <h3>Hours &gt; 10 C</h3>
+                <p>Total time above 10 C. This is a stronger warning signal than time above 4 C.</p>
+              </article>
+
+              <article>
+                <h3>Hours &gt; 15 C</h3>
+                <p>Total time above 15 C. Larger values usually indicate severe cold-chain abuse.</p>
+              </article>
+
+              <article>
+                <h3>Remaining Quality Window h</h3>
+                <p>Estimated hours left before quality window becomes too short. Smaller values mean higher urgency.</p>
+              </article>
+
+              <article>
+                <h3>Visual Proxy Score 0-16</h3>
+                <p>Structured visual/sensory score. Use 5 as default if unknown.</p>
+                <ul>
+                  <li><strong>0-5</strong>: normal reference.</li>
+                  <li><strong>6-10</strong>: check / moderate concern.</li>
+                  <li><strong>11-16</strong>: poor / high concern.</li>
+                </ul>
+              </article>
+
+              <article>
+                <h3>Photo Optional</h3>
+                <p>Uploaded photo is used for visual anomaly screening only. It does not replace visual proxy score in the XGBoost model.</p>
+              </article>
+
+              <article>
+                <h3>Save This Manual Lot</h3>
+                <p>If checked, the manual row is appended to the local CSV dataset used by Dataset Mode.</p>
+              </article>
+            </div>
+          </section>
         </section>
       </section>
     </main>

@@ -17,6 +17,10 @@ const manualPanel = document.querySelector("#manual-panel");
 const photoInput = document.querySelector("#photo");
 const photoFileName = document.querySelector("#photo-file-name");
 const clearPhotoButton = document.querySelector("#clear-photo");
+const outputGuideTab = document.querySelector("#output-guide-tab");
+const inputGuideTab = document.querySelector("#input-guide-tab");
+const outputGuidePanel = document.querySelector("#output-guide-panel");
+const inputGuidePanel = document.querySelector("#input-guide-panel");
 
 const fields = {
   condition: document.querySelector("#condition"),
@@ -194,6 +198,14 @@ function setMode(mode) {
   datasetTab.classList.toggle("active", !manual);
 }
 
+function setGuideMode(mode) {
+  const input = mode === "input";
+  inputGuidePanel.hidden = !input;
+  outputGuidePanel.hidden = input;
+  inputGuideTab.classList.toggle("active", input);
+  outputGuideTab.classList.toggle("active", !input);
+}
+
 async function loadLots() {
   const params = new URLSearchParams({ limit: "12" });
   const query = lotInput.value.trim();
@@ -280,6 +292,8 @@ clearPhotoButton.addEventListener("click", () => {
 
 datasetTab.addEventListener("click", () => setMode("dataset"));
 manualTab.addEventListener("click", () => setMode("manual"));
+outputGuideTab.addEventListener("click", () => setGuideMode("output"));
+inputGuideTab.addEventListener("click", () => setGuideMode("input"));
 
 loadLots()
   .then(() => predictLot(lotInput.value))
