@@ -41,6 +41,23 @@ CATEGORICAL_FEATURES = [
 
 FEATURE_COLUMNS = NUMERIC_FEATURES + CATEGORICAL_FEATURES
 
+APP_DEFAULTS = {
+    "species_common": "lemuru",
+    "scientific_name": "Sardinella lemuru",
+    "product_form": "whole_fresh",
+    "prehistory_equivalent_ice_h": 0.0,
+    "baseline_shelf_life_h": 168.0,
+    "traceability_status": "MANUAL_INPUT",
+    "origin_node_id": "N001",
+    "logger_missing_intervals": 0,
+    "condition_status": "MANUAL_UNKNOWN",
+    "risk_score_0_100": 0.0,
+    "recommended_action": "MANUAL_UNKNOWN",
+    "candidate_destination_node_id": "MANUAL_UNKNOWN",
+    "rationale": "Manual or uploaded MVP input",
+    "human_override_required": "YES",
+}
+
 
 def condition_from_proxy(score: float) -> str:
     if score <= 5:
@@ -77,6 +94,47 @@ def load_app_table(path: str | Path = APP_TABLE_PATH) -> pd.DataFrame:
             "Run: python -m src.tabular.export_app_table"
         )
     return pd.read_csv(table_path)
+
+
+def normalize_app_rows(df: pd.DataFrame, template: pd.DataFrame | None = None) -> pd.DataFrame:
+    rows = df.copy()
+    for column, value in APP_DEFAULTS.items():
+        if column not in rows.columns:
+            rows[column] = value
+        else:
+            rows[column] = rows[column].fillna(value)
+
+    if "lot_id" not in rows.columns:
+        raise ValueError("Missing required column: lot_id")
+
+    if "min_temp_c" not in rows.columns and {"mean_temp_c", "max_temp_c"}.issubset(rows.columns):
+        rows["min_temp_c"] = rows[["mean_temp_c", "max_temp_c"]].min(axis=1)
+    if "equivalent_ice_age_h" not in rows.columns and "remaining_quality_window_h" in rows.columns:
+        rows["equivalent_ice_age_h"] = (168.0 - pd.to_numeric(rows["remaining_quality_window_h"], errors="coerce")).clip(lower=0)
+    if "total_proxy_0_16" in rows.columns:
+        rows["condition_status"] = pd.to_numeric(rows["total_proxy_0_16"], errors="coerce").fillna(0).apply(condition_from_proxy)
+
+    missing_features = set(FEATURE_COLUMNS) - set(rows.columns)
+    if missing_features:
+        raise ValueError(f"Missing feature columns: {sorted(missing_features)}")
+
+    if template is not None:
+        for column in template.columns:
+            if column not in rows.columns:
+                rows[column] = APP_DEFAULTS.get(column, "")
+        return rows.reindex(columns=template.columns)
+    return rows
+
+
+def append_to_app_table(rows: pd.DataFrame, path: str | Path = APP_TABLE_PATH) -> int:
+    table_path = Path(path)
+    existing = load_app_table(table_path)
+    normalized = normalize_app_rows(rows, template=existing)
+    combined = pd.concat([existing, normalized], ignore_index=True)
+    combined = combined.drop_duplicates(subset=["lot_id"], keep="last")
+    table_path.parent.mkdir(parents=True, exist_ok=True)
+    combined.to_csv(table_path, index=False)
+    return int(len(normalized))
 
 
 def load_available_table(raw_root: str | Path = RAW_ROOT) -> pd.DataFrame:

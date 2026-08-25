@@ -227,6 +227,43 @@ button:hover {
   background: #dfeaf7;
 }
 
+.bulk-upload {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.bulk-upload label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.check-row {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 0 !important;
+  text-transform: none !important;
+}
+
+.check-row input {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  padding: 0;
+}
+
+.check-row span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .sample-list {
   margin-top: 28px;
 }

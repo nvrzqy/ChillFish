@@ -5,6 +5,11 @@ const statusEl = document.querySelector("#connection-status");
 const sampleButtons = document.querySelector("#sample-buttons");
 const lotOptions = document.querySelector("#lot-options");
 const exportButton = document.querySelector("#export-button");
+const bulkDatasetInput = document.querySelector("#bulk-dataset");
+const bulkFileName = document.querySelector("#bulk-file-name");
+const clearBulkFileButton = document.querySelector("#clear-bulk-file");
+const bulkExportButton = document.querySelector("#bulk-export-button");
+const mergeUploadedDataset = document.querySelector("#merge-uploaded-dataset");
 const datasetTab = document.querySelector("#dataset-tab");
 const manualTab = document.querySelector("#manual-tab");
 const datasetPanel = document.querySelector("#dataset-panel");
@@ -108,6 +113,49 @@ function updatePhotoLabel() {
   clearPhotoButton.hidden = !file;
 }
 
+function updateBulkFileLabel() {
+  const file = bulkDatasetInput.files && bulkDatasetInput.files[0];
+  bulkFileName.textContent = file ? file.name : "No dataset selected";
+  clearBulkFileButton.hidden = !file;
+}
+
+async function exportUploadedDataset() {
+  const file = bulkDatasetInput.files && bulkDatasetInput.files[0];
+  if (!file) {
+    setStatus("Choose a CSV dataset first", true);
+    return;
+  }
+
+  setStatus("Running uploaded dataset predictions...");
+  const formData = new FormData();
+  formData.append("dataset", file);
+  formData.append("merge_to_dataset", mergeUploadedDataset.checked ? "true" : "false");
+
+  const response = await fetch("/api/export/uploaded-predictions.csv", {
+    method: "POST",
+    body: formData,
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: "Uploaded dataset prediction failed" }));
+    throw new Error(error.detail || "Uploaded dataset prediction failed");
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "uploaded_chillfish_predictions.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  const savedRows = Number(response.headers.get("X-Saved-Rows") || 0);
+  setStatus(savedRows > 0 ? `Uploaded dataset export complete; merged ${savedRows} rows` : "Uploaded dataset export complete");
+  if (savedRows > 0) {
+    loadLots().catch(() => {});
+  }
+}
+
 async function predictLot(lotId) {
   setStatus("Running inference...");
   const response = await fetch(`/api/predict/${encodeURIComponent(lotId)}`);
@@ -132,7 +180,10 @@ async function predictManual(formData) {
   }
   const result = await response.json();
   renderPrediction(result);
-  setStatus("Manual inference complete");
+  setStatus(result.saved_to_dataset ? "Manual inference complete and saved" : "Manual inference complete");
+  if (result.saved_to_dataset) {
+    loadLots().catch(() => {});
+  }
 }
 
 function setMode(mode) {
@@ -204,6 +255,17 @@ exportButton.addEventListener("click", () => {
   window.setTimeout(() => setStatus("Export started"), 500);
 });
 
+bulkDatasetInput.addEventListener("change", updateBulkFileLabel);
+
+clearBulkFileButton.addEventListener("click", () => {
+  bulkDatasetInput.value = "";
+  updateBulkFileLabel();
+});
+
+bulkExportButton.addEventListener("click", () => {
+  exportUploadedDataset().catch((error) => setStatus(error.message, true));
+});
+
 manualForm.addEventListener("submit", (event) => {
   event.preventDefault();
   predictManual(new FormData(manualForm)).catch((error) => setStatus(error.message, true));
@@ -224,3 +286,4 @@ loadLots()
   .catch((error) => setStatus(error.message, true));
 
 updatePhotoLabel();
+updateBulkFileLabel();

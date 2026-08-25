@@ -8,14 +8,18 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.config import PROJECT_ROOT
-from src.tabular.dataset import load_available_table
-from src.tabular.predict_lot import predict_feature_row, predict_feature_table, predict_lot
+from src.tabular.dataset import append_to_app_table, load_app_table, normalize_app_rows
+from src.tabular.predict_lot import predict_feature_row, predict_feature_table
 
 
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
 
 app = FastAPI(title="ChillFish AI MVP", version="0.1.0")
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+
+def _load_ui_table() -> pd.DataFrame:
+    return load_app_table()
 
 
 @app.get("/")
@@ -30,7 +34,7 @@ def health():
 
 @app.get("/api/lots")
 def list_lots(limit: int = 600, q: str = ""):
-    df = load_available_table()
+    df = _load_ui_table()
     if q:
         query = q.strip().lower()
         df = df[
@@ -49,7 +53,11 @@ def list_lots(limit: int = 600, q: str = ""):
 @app.get("/api/predict/{lot_id}")
 def predict(lot_id: str):
     try:
-        return predict_lot(lot_id)
+        df = _load_ui_table()
+        row = df[df["lot_id"] == lot_id]
+        if row.empty:
+            raise ValueError(f"Unknown lot_id: {lot_id}")
+        return predict_feature_row(row)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except FileNotFoundError as exc:
@@ -58,7 +66,7 @@ def predict(lot_id: str):
 
 @app.get("/api/export/predictions.csv")
 def export_predictions():
-    df = load_available_table()
+    df = _load_ui_table()
     predictions = predict_feature_table(df)
     buffer = StringIO()
     predictions.to_csv(buffer, index=False)
@@ -67,6 +75,45 @@ def export_predictions():
         iter([buffer.getvalue()]),
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=chillfish_predictions.csv"},
+    )
+
+
+@app.post("/api/export/uploaded-predictions.csv")
+async def export_uploaded_predictions(dataset: UploadFile = File(...), merge_to_dataset: bool = Form(False)):
+    if not dataset.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Uploaded dataset must be a CSV file.")
+
+    try:
+        uploaded_df = pd.read_csv(dataset.file)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Could not read CSV: {exc}") from exc
+
+    if uploaded_df.empty:
+        raise HTTPException(status_code=400, detail="Uploaded CSV is empty.")
+
+    try:
+        normalized_df = normalize_app_rows(uploaded_df)
+        predictions = predict_feature_table(normalized_df)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Could not run prediction: {exc}") from exc
+
+    saved_rows = 0
+    if merge_to_dataset:
+        try:
+            saved_rows = append_to_app_table(normalized_df)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=f"Predicted CSV, but could not merge dataset: {exc}") from exc
+
+    buffer = StringIO()
+    predictions.to_csv(buffer, index=False)
+    buffer.seek(0)
+    return StreamingResponse(
+        iter([buffer.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=uploaded_chillfish_predictions.csv",
+            "X-Saved-Rows": str(saved_rows),
+        },
     )
 
 
@@ -171,6 +218,7 @@ async def predict_manual(
     time_above_15c_h: float = Form(0.0),
     remaining_quality_window_h: float = Form(...),
     visual_proxy_score_0_16: float = Form(5.0),
+    save_to_dataset: bool = Form(False),
     photo: UploadFile | None = File(None),
 ):
     row = _manual_row(
@@ -189,6 +237,10 @@ async def predict_manual(
     result = predict_feature_row(row)
     result["input_mode"] = "manual"
     result["visual_upload"] = await _try_visual_inference(photo)
+    result["saved_to_dataset"] = False
+    if save_to_dataset:
+        append_to_app_table(row)
+        result["saved_to_dataset"] = True
     result["claim_note"] = (
         "Manual input prediction uses the trained XGBoost MVP model. "
         "Decision-support only; validate thresholds and labels before operational use."

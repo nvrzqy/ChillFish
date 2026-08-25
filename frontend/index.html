@@ -35,6 +35,20 @@
 
             <button id="export-button" class="export-button" type="button">Export All Predictions</button>
 
+            <div class="bulk-upload">
+              <label for="bulk-dataset">Upload CSV Dataset</label>
+              <div class="file-control">
+                <input id="bulk-dataset" name="dataset" type="file" accept=".csv,text/csv" />
+                <span id="bulk-file-name">No dataset selected</span>
+                <button id="clear-bulk-file" type="button" aria-label="Clear selected dataset">x</button>
+              </div>
+              <label class="check-row" for="merge-uploaded-dataset">
+                <input id="merge-uploaded-dataset" type="checkbox" />
+                <span>Merge uploaded rows into local dataset</span>
+              </label>
+              <button id="bulk-export-button" class="export-button" type="button">Predict Uploaded CSV</button>
+            </div>
+
             <div class="sample-list" aria-label="Sample lots">
               <div class="section-label">Matching Lots</div>
               <div id="sample-buttons" class="sample-buttons"></div>
@@ -101,6 +115,11 @@
                 <span id="photo-file-name">No photo selected</span>
                 <button id="clear-photo" type="button" aria-label="Clear selected photo">x</button>
               </div>
+
+              <label class="check-row" for="save-to-dataset">
+                <input id="save-to-dataset" name="save_to_dataset" type="checkbox" value="true" />
+                <span>Save this manual lot to local dataset</span>
+              </label>
 
               <button type="submit" class="wide-button">Predict New Lot</button>
             </form>
