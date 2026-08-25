@@ -14,8 +14,13 @@
             <div class="mark" aria-hidden="true">CF</div>
             <div>
               <h1>ChillFish</h1>
-              <p>AI decision support for lemuru cold-chain lots</p>
+              <p data-i18n="brandSubtitle">AI decision support for lemuru cold-chain lots</p>
             </div>
+          </div>
+
+          <div class="language-toggle" role="group" aria-label="Language">
+            <button id="lang-en" class="active" type="button">EN</button>
+            <button id="lang-id" type="button">ID</button>
           </div>
 
           <div class="mode-tabs" role="tablist" aria-label="Inference mode">
@@ -25,18 +30,18 @@
 
           <section id="dataset-panel">
             <form id="predict-form" class="lot-form">
-              <label for="lot-id">Lot ID</label>
+              <label for="lot-id" data-i18n="lotId">Lot ID</label>
               <div class="input-row">
                 <input id="lot-id" name="lot-id" list="lot-options" value="PGB-LMR-0003" autocomplete="off" />
-                <button type="submit">Run AI</button>
+                <button type="submit" data-i18n="runAi">Run AI</button>
               </div>
               <datalist id="lot-options"></datalist>
             </form>
 
-            <button id="export-button" class="export-button" type="button">Export All Predictions</button>
+            <button id="export-button" class="export-button" type="button" data-i18n="exportAll">Export All Predictions</button>
 
             <div class="bulk-upload">
-              <label for="bulk-dataset">Upload CSV Dataset</label>
+              <label for="bulk-dataset" data-i18n="uploadCsv">Upload CSV Dataset</label>
               <div class="file-control">
                 <input id="bulk-dataset" name="dataset" type="file" accept=".csv,text/csv" />
                 <span id="bulk-file-name">No dataset selected</span>
@@ -44,26 +49,26 @@
               </div>
               <label class="check-row" for="merge-uploaded-dataset">
                 <input id="merge-uploaded-dataset" type="checkbox" />
-                <span>Merge uploaded rows into local dataset</span>
+                <span data-i18n="mergeUploaded">Merge uploaded rows into local dataset</span>
               </label>
-              <button id="bulk-export-button" class="export-button" type="button">Predict Uploaded CSV</button>
+              <button id="bulk-export-button" class="export-button" type="button" data-i18n="predictUploaded">Predict Uploaded CSV</button>
             </div>
 
             <div class="sample-list" aria-label="Sample lots">
-              <div class="section-label">Matching Lots</div>
+              <div class="section-label" data-i18n="matchingLots">Matching Lots</div>
               <div id="sample-buttons" class="sample-buttons"></div>
             </div>
           </section>
 
           <section id="manual-panel" hidden>
             <form id="manual-form" class="manual-form">
-              <label for="manual-lot-id">New Lot ID</label>
+              <label for="manual-lot-id" data-i18n="newLotId">New Lot ID</label>
               <input id="manual-lot-id" name="lot_id" value="NEW-LEMURU-001" />
 
-              <label for="lot-mass">Lot Mass kg</label>
+              <label for="lot-mass" data-i18n="lotMass">Lot Mass kg</label>
               <input id="lot-mass" name="lot_mass_kg" type="number" value="350" min="1" step="1" />
 
-              <label for="handling-scenario">Handling Scenario</label>
+              <label for="handling-scenario" data-i18n="handlingScenario">Handling Scenario</label>
               <select id="handling-scenario" name="handling_scenario">
                 <option value="controlled_ice">controlled_ice</option>
                 <option value="delayed_chilling_2h">delayed_chilling_2h</option>
@@ -71,7 +76,7 @@
                 <option value="loading_excursion">loading_excursion</option>
               </select>
 
-              <label for="target-market">Target Market Node</label>
+              <label for="target-market" data-i18n="targetMarket">Target Market Node</label>
               <select id="target-market" name="target_market_node_id">
                 <option value="N004">N004</option>
                 <option value="N005">N005</option>
@@ -80,36 +85,36 @@
 
               <div class="two-col">
                 <div>
-                  <label for="mean-temp">Mean Temp C</label>
+                  <label for="mean-temp" data-i18n="meanTemp">Mean Temp C</label>
                   <input id="mean-temp" name="mean_temp_c" type="number" value="2.5" step="0.1" />
                 </div>
                 <div>
-                  <label for="max-temp-input">Max Temp C</label>
+                  <label for="max-temp-input" data-i18n="maxTempInput">Max Temp C</label>
                   <input id="max-temp-input" name="max_temp_c" type="number" value="8.0" step="0.1" />
                 </div>
               </div>
 
               <div class="two-col">
                 <div>
-                  <label for="above-4-input">Hours &gt; 4 C</label>
+                  <label for="above-4-input" data-i18n="hoursAbove4">Hours &gt; 4 C</label>
                   <input id="above-4-input" name="time_above_4c_h" type="number" value="2" min="0" step="0.25" />
                 </div>
                 <div>
-                  <label for="above-10-input">Hours &gt; 10 C</label>
+                  <label for="above-10-input" data-i18n="hoursAbove10">Hours &gt; 10 C</label>
                   <input id="above-10-input" name="time_above_10c_h" type="number" value="0.5" min="0" step="0.25" />
                 </div>
               </div>
 
-              <label for="above-15-input">Hours &gt; 15 C</label>
+              <label for="above-15-input" data-i18n="hoursAbove15">Hours &gt; 15 C</label>
               <input id="above-15-input" name="time_above_15c_h" type="number" value="0" min="0" step="0.25" />
 
-              <label for="remaining-window-input">Remaining Quality Window h</label>
+              <label for="remaining-window-input" data-i18n="remainingQualityWindow">Remaining Quality Window h</label>
               <input id="remaining-window-input" name="remaining_quality_window_h" type="number" value="96" min="0" step="1" />
 
-              <label for="visual-score">Visual Proxy Score 0-16</label>
+              <label for="visual-score" data-i18n="visualProxyScore">Visual Proxy Score 0-16</label>
               <input id="visual-score" name="visual_proxy_score_0_16" type="number" value="6" min="0" max="16" step="1" />
 
-              <label for="photo">Photo optional</label>
+              <label for="photo" data-i18n="photoOptional">Photo optional</label>
               <div class="file-control">
                 <input id="photo" name="photo" type="file" accept="image/*" />
                 <span id="photo-file-name">No photo selected</span>
@@ -118,69 +123,60 @@
 
               <label class="check-row" for="save-to-dataset">
                 <input id="save-to-dataset" name="save_to_dataset" type="checkbox" value="true" />
-                <span>Save this manual lot to local dataset</span>
+                <span data-i18n="saveManual">Save this manual lot to local dataset</span>
               </label>
 
-              <button type="submit" class="wide-button">Predict New Lot</button>
+              <button type="submit" class="wide-button" data-i18n="predictNewLot">Predict New Lot</button>
             </form>
           </section>
-
-          <div class="note">
-            <strong>MVP scope:</strong> one input, synchronous local inference, static parameters.
-          </div>
         </aside>
 
         <section class="result-pane" aria-live="polite">
-          <div class="status-strip">
-            <span id="connection-status">Ready</span>
-            <span>Local inference</span>
-          </div>
-
           <div class="summary-grid">
             <div class="metric condition">
-              <span>Condition</span>
+              <span data-i18n="conditionLabel">Condition</span>
               <strong id="condition">-</strong>
             </div>
             <div class="metric risk">
-              <span>Risk Score</span>
+              <span data-i18n="riskScoreLabel">Risk Score</span>
               <strong id="risk-score">-</strong>
             </div>
             <div class="metric action">
-              <span>Recommendation</span>
+              <span data-i18n="recommendationLabel">Recommendation</span>
               <strong id="action">-</strong>
             </div>
           </div>
 
           <div class="details-layout">
             <section>
-              <h2>Action Probability</h2>
+              <h2 data-i18n="actionProbability">Action Probability</h2>
               <div id="action-probs" class="bars"></div>
             </section>
 
             <section>
-              <h2>Condition Probability</h2>
+              <h2 data-i18n="conditionProbability">Condition Probability</h2>
               <div id="condition-probs" class="bars"></div>
             </section>
           </div>
 
           <section class="signals">
-            <h2>Key Signals</h2>
+            <h2 data-i18n="keySignals">Key Signals</h2>
             <dl>
-              <div><dt>Remaining quality window</dt><dd id="remaining-window">-</dd></div>
-              <div><dt>Max temperature</dt><dd id="max-temp">-</dd></div>
-              <div><dt>Time above 10 C</dt><dd id="above-10">-</dd></div>
-              <div><dt>Visual proxy score</dt><dd id="visual-proxy">-</dd></div>
-              <div><dt>Handling scenario</dt><dd id="scenario">-</dd></div>
+              <div><dt data-i18n="remainingSignal">Remaining quality window</dt><dd id="remaining-window">-</dd></div>
+              <div><dt data-i18n="maxTempSignal">Max temperature</dt><dd id="max-temp">-</dd></div>
+              <div><dt data-i18n="above10Signal">Time above 10 C</dt><dd id="above-10">-</dd></div>
+              <div><dt data-i18n="visualProxySignal">Visual proxy score</dt><dd id="visual-proxy">-</dd></div>
+              <div><dt data-i18n="scenarioSignal">Handling scenario</dt><dd id="scenario">-</dd></div>
             </dl>
           </section>
 
           <section class="signals" id="visual-upload-section" hidden>
-            <h2>Visual Anomaly</h2>
+            <h2 data-i18n="visualAnomaly">Visual Anomaly</h2>
             <div class="visual-card" id="visual-upload-card">
               <span id="visual-upload-file">-</span>
               <strong id="visual-upload-status">-</strong>
               <div class="visual-score-row">
-                <span>Anomaly score</span>
+                <span data-i18n="anomalyScore">Anomaly score</span>
                 <b id="visual-upload-score">-</b>
               </div>
               <p id="visual-upload-note"></p>
@@ -193,143 +189,13 @@
 
           <section class="guide-section" aria-label="Guide">
             <div class="guide-tabs" role="tablist" aria-label="Guide type">
-              <button id="output-guide-tab" class="active" type="button">Output Guide</button>
-              <button id="input-guide-tab" type="button">Manual Input Guide</button>
+              <button id="output-guide-tab" class="active" type="button" data-i18n="outputGuide">Output Guide</button>
+              <button id="input-guide-tab" type="button" data-i18n="inputGuide">Manual Input Guide</button>
             </div>
 
-            <div id="output-guide-panel" class="guide-grid">
-              <article>
-                <h3>Condition</h3>
-                <p>AI estimate of lot condition from tabular features.</p>
-                <ul>
-                  <li><strong>NORMAL</strong>: visual proxy 0-5, generally normal.</li>
-                  <li><strong>CHECK</strong>: visual proxy 6-10, needs attention.</li>
-                  <li><strong>POOR</strong>: visual proxy 11-16, higher concern.</li>
-                </ul>
-              </article>
+            <div id="output-guide-panel" class="guide-grid"></div>
 
-              <article>
-                <h3>Risk Score</h3>
-                <p>Predicted quality downgrade risk from the AI model. Higher means more urgent.</p>
-                <ul>
-                  <li><strong>0-30</strong>: lower risk.</li>
-                  <li><strong>31-60</strong>: watch / moderate risk.</li>
-                  <li><strong>61-100</strong>: high risk, prioritize action.</li>
-                </ul>
-              </article>
-
-              <article>
-                <h3>Recommendation</h3>
-                <p>Operational action suggested by the model.</p>
-                <ul>
-                  <li><strong>HOLD_CHILLED</strong>: keep chilled, no urgent action.</li>
-                  <li><strong>RE_ICE_AND_ROUTE</strong>: add ice / improve cold-chain, then route.</li>
-                  <li><strong>PROCESS_IMMEDIATELY</strong>: process quickly.</li>
-                  <li><strong>MANUAL_INSPECTION</strong>: human inspection recommended.</li>
-                  <li><strong>DOMESTIC_CHILLED</strong>: route as chilled domestic lot.</li>
-                  <li><strong>PROCESS_EXPORT_CANDIDATE</strong>: candidate for processing/export scenario.</li>
-                  <li><strong>LOCAL_FRESH_ONLY</strong>: local fresh route only.</li>
-                </ul>
-              </article>
-
-              <article>
-                <h3>Probability</h3>
-                <p>Model confidence for the top condition or action. It is not a food-safety probability.</p>
-              </article>
-
-              <article>
-                <h3>Key Signals</h3>
-                <p>Input factors that help explain the prediction.</p>
-                <ul>
-                  <li><strong>Remaining quality window</strong>: estimated hours before quality window runs out.</li>
-                  <li><strong>Max temperature</strong>: highest recorded temperature.</li>
-                  <li><strong>Time above 10 C</strong>: duration of stronger thermal exposure.</li>
-                  <li><strong>Visual proxy score</strong>: manual/synthetic visual score from 0 normal to 16 poor.</li>
-                </ul>
-              </article>
-
-              <article>
-                <h3>Visual Anomaly</h3>
-                <p>Photo-based comparison against normal lemuru reference images.</p>
-                <ul>
-                  <li><strong>NORMAL</strong>: similar to reference photos.</li>
-                  <li><strong>CHECK</strong>: somewhat different; inspect if needed.</li>
-                  <li><strong>ANOMALOUS</strong>: noticeably different from reference photos.</li>
-                </ul>
-              </article>
-            </div>
-
-            <div id="input-guide-panel" class="guide-grid" hidden>
-              <article>
-                <h3>Lot ID</h3>
-                <p>Unique name/code for the new fish lot. Example: <strong>NEW-LEMURU-001</strong>.</p>
-              </article>
-
-              <article>
-                <h3>Lot Mass kg</h3>
-                <p>Total mass of the lot in kilograms. This helps represent shipment scale.</p>
-              </article>
-
-              <article>
-                <h3>Handling Scenario</h3>
-                <p>Current handling condition, such as controlled ice, delayed chilling, melted ice, or loading excursion.</p>
-              </article>
-
-              <article>
-                <h3>Target Market Node</h3>
-                <p>Destination scenario code used by the MVP dataset. It represents where the lot is planned to go.</p>
-              </article>
-
-              <article>
-                <h3>Mean Temp C</h3>
-                <p>Average product temperature from logger/sensor history. Higher average temperature can increase quality risk.</p>
-              </article>
-
-              <article>
-                <h3>Max Temp C</h3>
-                <p>Highest recorded product temperature. This captures possible temperature excursions.</p>
-              </article>
-
-              <article>
-                <h3>Hours &gt; 4 C</h3>
-                <p>Total time above 4 C. This indicates mild cold-chain exposure for chilled fish.</p>
-              </article>
-
-              <article>
-                <h3>Hours &gt; 10 C</h3>
-                <p>Total time above 10 C. This is a stronger warning signal than time above 4 C.</p>
-              </article>
-
-              <article>
-                <h3>Hours &gt; 15 C</h3>
-                <p>Total time above 15 C. Larger values usually indicate severe cold-chain abuse.</p>
-              </article>
-
-              <article>
-                <h3>Remaining Quality Window h</h3>
-                <p>Estimated hours left before quality window becomes too short. Smaller values mean higher urgency.</p>
-              </article>
-
-              <article>
-                <h3>Visual Proxy Score 0-16</h3>
-                <p>Structured visual/sensory score. Use 5 as default if unknown.</p>
-                <ul>
-                  <li><strong>0-5</strong>: normal reference.</li>
-                  <li><strong>6-10</strong>: check / moderate concern.</li>
-                  <li><strong>11-16</strong>: poor / high concern.</li>
-                </ul>
-              </article>
-
-              <article>
-                <h3>Photo Optional</h3>
-                <p>Uploaded photo is used for visual anomaly screening only. It does not replace visual proxy score in the XGBoost model.</p>
-              </article>
-
-              <article>
-                <h3>Save This Manual Lot</h3>
-                <p>If checked, the manual row is appended to the local CSV dataset used by Dataset Mode.</p>
-              </article>
-            </div>
+            <div id="input-guide-panel" class="guide-grid" hidden></div>
           </section>
         </section>
       </section>
