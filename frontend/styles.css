@@ -179,6 +179,41 @@ button:hover {
   margin-top: 6px;
 }
 
+.file-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.file-control input[type="file"] {
+  grid-column: 1 / -1;
+  padding: 9px;
+  background: white;
+}
+
+.file-control span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-control button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: #f3e8e8;
+  color: var(--red);
+  font-weight: 800;
+}
+
+.file-control button:hover {
+  background: #f8d7d7;
+}
+
 .export-button {
   width: 100%;
   min-height: 42px;
@@ -344,6 +379,79 @@ dd {
 .claim-note {
   margin-top: 22px;
   font-size: 13px;
+}
+
+.visual-card {
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--muted);
+  padding: 18px;
+  background: #ffffff;
+}
+
+.visual-card > span {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.visual-card > strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.visual-score-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.visual-score-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.visual-score-row b {
+  font-size: 24px;
+}
+
+.visual-card p {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.visual-normal {
+  border-left-color: var(--green);
+}
+
+.visual-normal > strong,
+.visual-normal .visual-score-row b {
+  color: var(--green);
+}
+
+.visual-check {
+  border-left-color: var(--amber);
+}
+
+.visual-check > strong,
+.visual-check .visual-score-row b {
+  color: var(--amber);
+}
+
+.visual-anomalous {
+  border-left-color: var(--red);
+}
+
+.visual-anomalous > strong,
+.visual-anomalous .visual-score-row b {
+  color: var(--red);
 }
 
 .is-error {

@@ -96,7 +96,11 @@
               <input id="visual-score" name="visual_proxy_score_0_16" type="number" value="6" min="0" max="16" step="1" />
 
               <label for="photo">Photo optional</label>
-              <input id="photo" name="photo" type="file" accept="image/*" />
+              <div class="file-control">
+                <input id="photo" name="photo" type="file" accept="image/*" />
+                <span id="photo-file-name">No photo selected</span>
+                <button id="clear-photo" type="button" aria-label="Clear selected photo">x</button>
+              </div>
 
               <button type="submit" class="wide-button">Predict New Lot</button>
             </form>
@@ -152,8 +156,16 @@
           </section>
 
           <section class="signals" id="visual-upload-section" hidden>
-            <h2>Photo Upload</h2>
-            <p id="visual-upload-note" class="claim-note"></p>
+            <h2>Visual Anomaly</h2>
+            <div class="visual-card" id="visual-upload-card">
+              <span id="visual-upload-file">-</span>
+              <strong id="visual-upload-status">-</strong>
+              <div class="visual-score-row">
+                <span>Anomaly score</span>
+                <b id="visual-upload-score">-</b>
+              </div>
+              <p id="visual-upload-note"></p>
+            </div>
           </section>
 
           <p class="claim-note" id="claim-note">

@@ -9,6 +9,9 @@ const datasetTab = document.querySelector("#dataset-tab");
 const manualTab = document.querySelector("#manual-tab");
 const datasetPanel = document.querySelector("#dataset-panel");
 const manualPanel = document.querySelector("#manual-panel");
+const photoInput = document.querySelector("#photo");
+const photoFileName = document.querySelector("#photo-file-name");
+const clearPhotoButton = document.querySelector("#clear-photo");
 
 const fields = {
   condition: document.querySelector("#condition"),
@@ -23,6 +26,10 @@ const fields = {
   scenario: document.querySelector("#scenario"),
   claimNote: document.querySelector("#claim-note"),
   visualUploadSection: document.querySelector("#visual-upload-section"),
+  visualUploadCard: document.querySelector("#visual-upload-card"),
+  visualUploadFile: document.querySelector("#visual-upload-file"),
+  visualUploadStatus: document.querySelector("#visual-upload-status"),
+  visualUploadScore: document.querySelector("#visual-upload-score"),
   visualUploadNote: document.querySelector("#visual-upload-note"),
 };
 
@@ -77,13 +84,28 @@ function renderPrediction(result) {
   if (result.visual_upload) {
     fields.visualUploadSection.hidden = false;
     const upload = result.visual_upload;
-    fields.visualUploadNote.textContent = upload.anomaly_score
-      ? `${upload.filename}: ${upload.status}, anomaly score ${upload.anomaly_score.toFixed(4)}`
-      : `${upload.filename}: ${upload.note || upload.status}`;
+    const hasScore = typeof upload.anomaly_score === "number";
+    fields.visualUploadCard.className = `visual-card visual-${(upload.status || "unknown").toLowerCase()}`;
+    fields.visualUploadFile.textContent = upload.filename || "Uploaded photo";
+    fields.visualUploadStatus.textContent = upload.status || "PHOTO_RECEIVED";
+    fields.visualUploadScore.textContent = hasScore ? upload.anomaly_score.toFixed(4) : "-";
+    fields.visualUploadNote.textContent = hasScore
+      ? `Check threshold ${upload.check_threshold.toFixed(4)}. Anomaly threshold ${upload.anomaly_threshold.toFixed(4)}.`
+      : upload.note || "";
   } else {
     fields.visualUploadSection.hidden = true;
+    fields.visualUploadCard.className = "visual-card";
+    fields.visualUploadFile.textContent = "-";
+    fields.visualUploadStatus.textContent = "-";
+    fields.visualUploadScore.textContent = "-";
     fields.visualUploadNote.textContent = "";
   }
+}
+
+function updatePhotoLabel() {
+  const file = photoInput.files && photoInput.files[0];
+  photoFileName.textContent = file ? file.name : "No photo selected";
+  clearPhotoButton.hidden = !file;
 }
 
 async function predictLot(lotId) {
@@ -187,9 +209,18 @@ manualForm.addEventListener("submit", (event) => {
   predictManual(new FormData(manualForm)).catch((error) => setStatus(error.message, true));
 });
 
+photoInput.addEventListener("change", updatePhotoLabel);
+
+clearPhotoButton.addEventListener("click", () => {
+  photoInput.value = "";
+  updatePhotoLabel();
+});
+
 datasetTab.addEventListener("click", () => setMode("dataset"));
 manualTab.addEventListener("click", () => setMode("manual"));
 
 loadLots()
   .then(() => predictLot(lotInput.value))
   .catch((error) => setStatus(error.message, true));
+
+updatePhotoLabel();
